@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="anchorPane" stylesheets="@taskManager.css" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="681.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="justdoit.viewmodel.TaskManagerController">
+  <children>
+    <Pane prefHeight="550.0" prefWidth="580.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.5" AnchorPane.rightAnchor="-2.5" AnchorPane.topAnchor="0.0">
+      <children>
+        <Pane fx:id="taskAddingPane" layoutX="17.0" layoutY="24.0" prefHeight="179.0" prefWidth="653.0">
+          <children>
+            <GridPane gridLinesVisible="false" layoutX="0.0" layoutY="0.0" prefHeight="141.0" prefWidth="339.0">
+              <children>
+                <Label text="Task name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label text="Priority:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <ChoiceBox fx:id="priorityChoiceBox" prefHeight="30.0" prefWidth="200.0" value="Low" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <items>
+                    <FXCollections fx:factory="observableArrayList">
+                      <String fx:value="Low" />
+                      <String fx:value="Medium" />
+                      <String fx:value="Height" />
+                    </FXCollections>
+                  </items>
+                </ChoiceBox>
+                <ChoiceBox fx:id="statusChoiceBox" prefHeight="30.0" prefWidth="200.0" value="To Do" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                  <items>
+                    <FXCollections fx:factory="observableArrayList">
+                      <String fx:value="To Do" />
+                      <String fx:value="In Progress" />
+                      <String fx:value="Done" />
+                      <String fx:value="Canceled" />
+                    </FXCollections>
+                  </items>
+                </ChoiceBox>
+                <TextField fx:id="taskNameTextField" prefHeight="30.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+              </children>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="169.0" minWidth="10.0" prefWidth="143.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="214.0" minWidth="10.0" prefWidth="196.0" />
+              </columnConstraints>
+              <padding>
+                <Insets right="10.0" />
+              </padding>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+            </GridPane>
+            <TextArea fx:id="descriptionTextArea" layoutX="339.0" layoutY="9.0" prefHeight="134.0" prefWidth="314.0" wrapText="true" />
+            <Button fx:id="addTaskButton" layoutX="339.0" layoutY="147.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="143.0" text="Add" />
+            <Button fx:id="cancelButton" layoutX="491.0" layoutY="147.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="162.0" text="Cancel" />
+          </children>
+          <padding>
+            <Insets />
+          </padding>
+        </Pane>
+        <Pane layoutX="11.0" layoutY="216.0" prefHeight="319.999977929685" prefWidth="653.0000915527344">
+          <children>
+            <DatePicker fx:id="selectedDatePicker" prefHeight="30" prefWidth="653.0"/>
+            <ListView fx:id="taskListView" layoutX="0.0" layoutY="39.0" prefHeight="242.0" prefWidth="653.0" />
+            <Button fx:id="cancelAllButton" layoutX="510.0" layoutY="290.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="143.0" text="Cancel all" />
+          </children>
+        </Pane>
+      </children>
+    </Pane>
+  </children>
+</AnchorPane>
