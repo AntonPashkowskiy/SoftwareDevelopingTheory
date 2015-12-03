@@ -1,0 +1,19 @@
+.button {
+    -fx-background-color: #1184D6;
+    -fx-text-fill: #F0F0F0;
+    -fx-background-radius: 15px;
+}
+
+.button:hover {
+    -fx-background-color: #359EE8;
+}
+
+.button:pressed {
+    -fx-background-color: #0E629E;
+}
+
+.choice-box,
+.combo-box {
+    -fx-background-radius: 15px;
+}
+
