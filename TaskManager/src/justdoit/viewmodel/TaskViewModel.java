@@ -1,64 +1,79 @@
 package justdoit.viewmodel;
 
-public class TaskViewModel {
-    private int taskId = 0;
-    private String taskName;
-    private String taskPriority;
-    private String taskStatus;
-    private String taskDescription;
+import java.time.LocalDate;
 
-    public TaskViewModel(String taskName, String taskPriority, String taskStatus, String taskDescription) {
-        this.taskName = taskName;
-        this.taskPriority = taskPriority;
-        this.taskStatus = taskStatus;
-        this.taskDescription = taskDescription;
+public class TaskViewModel {
+    private int id = 0;
+    private String name;
+    private String priority;
+    private String status;
+    private String description;
+    private LocalDate date;
+
+    public static int newTaskId = -1;
+
+    public TaskViewModel(
+            int taskId,
+            String taskName,
+            String taskPriority,
+            String taskStatus,
+            String taskDescription,
+            LocalDate taskDate) {
+        this.id = taskId;
+        this.name = taskName;
+        this.priority = taskPriority;
+        this.status = taskStatus;
+        this.description = taskDescription;
+        this.date = taskDate;
     }
 
     public void changePriority(String newPriority) {
         if (newPriority != null && !newPriority.isEmpty()) {
-            taskPriority = newPriority;
+            priority = newPriority;
         }
     }
 
     public void changeStatus(String newStatus) {
         if (newStatus != null && !newStatus.isEmpty()) {
-            taskStatus = newStatus;
+            status = newStatus;
         }
     }
 
     public void changeTaskName(String newTaskName) {
         if (newTaskName != null && !newTaskName.isEmpty()) {
-            taskName = newTaskName;
+            name = newTaskName;
         }
     }
 
     public void changeDescription(String newDescription) {
         if (newDescription != null && !newDescription.isEmpty()) {
-            taskDescription = newDescription;
+            description = newDescription;
         }
     }
 
-    public int getTaskId() {
-        return taskId;
+    public int getId() {
+        return id;
     }
 
-    public String getTaskName() {
-        return taskName;
+    public String getName() {
+        return name;
     }
 
-    public String getTaskPriority() {
-        return taskPriority;
+    public String getPriority() {
+        return priority;
     }
 
-    public String getTaskStatus() {
-        return taskStatus;
+    public String getStatus() {
+        return status;
     }
 
-    public String getTaskDescription() {
-        return taskDescription;
+    public String getDescription() {
+        return description;
     }
+
+    public LocalDate getDate() { return date; }
 
     public String toString() {
-        return String.format("%s.\t\tPriority: %s\t\tStatus: %s", taskName, taskPriority, taskStatus);
+        return String.format("%s.\t\tPriority: %s\t\tStatus: %s", name, priority, status);
     }
 }
