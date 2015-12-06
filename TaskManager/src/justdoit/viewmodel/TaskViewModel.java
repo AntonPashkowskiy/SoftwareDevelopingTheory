@@ -9,8 +9,9 @@ public class TaskViewModel {
     private String status;
     private String description;
     private LocalDate date;
+    private TypeOfChange typeOfChange;
 
-    public static int newTaskId = -1;
+    public static final int NewTaskId = -1;
 
     public TaskViewModel(
             int taskId,
@@ -51,6 +52,14 @@ public class TaskViewModel {
         }
     }
 
+    public void setTypeOfChange(TypeOfChange flag) {
+        typeOfChange = flag;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getId() {
         return id;
     }
@@ -72,6 +81,8 @@ public class TaskViewModel {
     }
 
     public LocalDate getDate() { return date; }
+
+    public TypeOfChange getTypeOfChange() { return typeOfChange; }
 
     public String toString() {
         return String.format("%s.\t\tPriority: %s\t\tStatus: %s", name, priority, status);

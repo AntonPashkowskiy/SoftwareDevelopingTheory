@@ -5,21 +5,58 @@ import justdoit.viewmodel.TaskViewModel;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TaskManager implements ITaskSource, ITaskObserver {
 
     private List<Task> taskList = new ArrayList<Task>();
 
-    @Override
-    public void update(TaskViewModel[] newTaskList) {
-        removeAllDeletedItems(newTaskList);
+    public TaskManager() {
+        Task[] taskArray = TaskStorage.getInstance().getAllTasks();
+        Collections.addAll(taskList, taskArray);
+    }
 
-        for (TaskViewModel viewModel : newTaskList) {
-            if (isNotExist(viewModel.getId())) {
-                taskList.add(Task.GetTask(viewModel));
-            } else {
-                updateTask(viewModel);
+    @Override
+    public int update(TaskViewModel viewModel) {
+        int taskId = 0;
+        switch (viewModel.getTypeOfChange()) {
+            case Changed:
+                Task targetTask = getTaskById(viewModel.getId());
+
+                if (targetTask != null) {
+                    targetTask.update(viewModel);
+                }
+                break;
+
+            case New:
+                taskId = generateNewTaskId();
+                viewModel.setId(taskId);
+                taskList.add(Task.getTask(viewModel));
+                break;
+
+            case Deleted:
+                deleteTaskById(viewModel.getId());
+                break;
+        }
+        TaskStorage.getInstance().updateStorageAsync(taskList.toArray(new Task[0]));
+
+        return taskId;
+    }
+
+    private Task getTaskById(int taskId) {
+        for (Task task : taskList) {
+            if (task.getId() == taskId) {
+                return task;
+            }
+        }
+        return null;
+    }
+
+    private void deleteTaskById(int taskId) {
+        for (int i = 0; i < taskList.size(); i++) {
+            if (taskList.get(i).getId() == taskId) {
+                taskList.remove(i);
             }
         }
     }
@@ -36,49 +73,14 @@ public class TaskManager implements ITaskSource, ITaskObserver {
         return result.toArray(new TaskViewModel[0]);
     }
 
-    @Override
-    public TaskViewModel[] getAllTasks() {
-        List<TaskViewModel> result = new ArrayList<TaskViewModel>();
+    private int generateNewTaskId() {
+        int maxId = 0;
 
         for (Task task : taskList) {
-            result.add(task.toTaskViewModel());
-        }
-
-        return result.toArray(new TaskViewModel[0]);
-    }
-
-    private void updateTask(TaskViewModel viewModel) {
-        for (Task task : taskList) {
-            if (task.getId() == viewModel.getId()) {
-                task.update(viewModel);
-                break;
+            if (task.getId() > maxId) {
+                maxId = task.getId();
             }
         }
-    }
-
-    private void removeAllDeletedItems(TaskViewModel[] newTaskList) {
-        for (int i = 0; i < taskList.size(); i++) {
-            if (!isExist(newTaskList, taskList.get(i).getId())) {
-                taskList.remove(i);
-            }
-        }
-    }
-
-    private boolean isExist(TaskViewModel[] newTaskList, int id) {
-        for (TaskViewModel viewModel : newTaskList) {
-            if (viewModel.getId() == id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isNotExist(int taskId) {
-        for (Task task : taskList) {
-            if (task.getId() == taskId) {
-                return false;
-            }
-        }
-        return true;
+        return maxId + 1;
     }
 }

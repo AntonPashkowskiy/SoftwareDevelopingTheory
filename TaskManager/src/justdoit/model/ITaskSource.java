@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface ITaskSource {
     TaskViewModel[] getTasksByDate(LocalDate date);
-    TaskViewModel[] getAllTasks();
 }

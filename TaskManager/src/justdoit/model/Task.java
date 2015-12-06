@@ -56,7 +56,7 @@ public class Task {
         this.status = getStatus(viewModel.getStatus());
     }
 
-    public static Task GetTask(TaskViewModel viewModel) {
+    public static Task getTask(TaskViewModel viewModel) {
         return new Task(
                 viewModel.getId(),
                 viewModel.getName(),
@@ -65,6 +65,42 @@ public class Task {
                 getStatus(viewModel.getStatus()),
                 viewModel.getDate()
         );
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        final String separator = "!separator!";
+
+        builder.append(id)
+        .append(separator)
+        .append(name)
+        .append(separator)
+        .append(description)
+        .append(separator)
+        .append(priority.toString())
+        .append(separator)
+        .append(status.toString())
+        .append(separator)
+        .append(date);
+
+        return builder.toString();
+    }
+
+    public static Task restoreFromString(String task) {
+        final String separator = "!separator!";
+        String[] properties = task.split(separator);
+
+        if (properties.length == 6) {
+            int id = Integer.parseInt(properties[0]);
+            String name = properties[1];
+            String description = properties[2];
+            TaskPriority priority = TaskPriority.valueOf(properties[3]);
+            TaskStatus status = TaskStatus.valueOf(properties[4]);
+            LocalDate date = LocalDate.parse(properties[5]);
+
+            return new Task(id, name, description, priority, status, date);
+        }
+        return null;
     }
 
     private static String getPriorityString(TaskPriority priority) {

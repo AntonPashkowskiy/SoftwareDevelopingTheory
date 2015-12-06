@@ -27,7 +27,6 @@ public class TaskManagerController implements ITaskSubject {
     @FXML Button cancelAllButton = new Button();
 
     private List<TaskViewModel> taskList = new ArrayList<TaskViewModel>();
-    private List<Integer> idList = new ArrayList<Integer>();
     private ObservableList<String> listViewItems = FXCollections.observableArrayList();
     private boolean isEditingMode = false;
     private int indexOfEditedTask = -1;
@@ -46,26 +45,22 @@ public class TaskManagerController implements ITaskSubject {
     }
 
     @Override
-    public void notifyObservers() {
-        observers.forEach(iTaskObserver ->
-                iTaskObserver.update(taskList.toArray(new TaskViewModel[0]))
-        );
+    public int notifyObservers(TaskViewModel viewModel) {
+        int result = 0;
+
+        for (ITaskObserver observer : observers) {
+            result = observer.update(viewModel);
+        }
+        return result;
     }
 
     public void setTaskSource(ITaskSource taskSource) {
         this.taskSource = taskSource;
         TaskViewModel[] currentTasks = taskSource.getTasksByDate(LocalDate.now());
-        TaskViewModel[] allTasks = taskSource.getAllTasks();
 
         if (currentTasks != null) {
             for (TaskViewModel task : currentTasks) {
                 addTask(task);
-            }
-        }
-
-        if (allTasks != null) {
-            for (TaskViewModel task : allTasks) {
-                idList.add(task.getId());
             }
         }
     }
@@ -108,11 +103,13 @@ public class TaskManagerController implements ITaskSubject {
         TaskViewModel task = getTaskFromForm();
 
         if (!task.getName().isEmpty()) {
+            task.setTypeOfChange(TypeOfChange.New);
+            int taskId = notifyObservers(task);
+            task.setId(taskId);
             taskList.add(task);
             listViewItems.add(task.toString());
             clearForm();
             clearErrorMessage();
-            notifyObservers();
         } else {
             showErrorMessage("Task name required.");
         }
@@ -129,15 +126,16 @@ public class TaskManagerController implements ITaskSubject {
         TaskViewModel task = getTaskFromForm();
 
         if (!task.getName().isEmpty()) {
-            taskList.get(taskIndex).changeStatus(task.getStatus());
-            taskList.get(taskIndex).changePriority(task.getPriority());
-            taskList.get(taskIndex).changeDescription(task.getDescription());
-            taskList.get(taskIndex).changeTaskName(task.getName());
-
+            TaskViewModel targetTask = taskList.get(taskIndex);
+            targetTask.changeStatus(task.getStatus());
+            targetTask.changePriority(task.getPriority());
+            targetTask.changeDescription(task.getDescription());
+            targetTask.changeTaskName(task.getName());
             synchronizeListsElements(taskIndex);
             clearForm();
             clearErrorMessage();
-            notifyObservers();
+            targetTask.setTypeOfChange(TypeOfChange.Changed);
+            notifyObservers(targetTask);
         } else {
             showErrorMessage("Task name required.");
         }
@@ -146,9 +144,11 @@ public class TaskManagerController implements ITaskSubject {
     private void deleteTask(int taskIndex) {
         if (taskIndex < listViewItems.size()) {
             clearForm();
+            TaskViewModel targetTask = taskList.get(taskIndex);
+            targetTask.setTypeOfChange(TypeOfChange.Deleted);
+            notifyObservers(targetTask);
             taskList.remove(taskIndex);
             listViewItems.remove(taskIndex);
-            notifyObservers();
         }
     }
 
@@ -168,22 +168,25 @@ public class TaskManagerController implements ITaskSubject {
 
     private void changeTaskPriority(int taskIndex, String newPriority) {
         taskList.get(taskIndex).changePriority(newPriority);
+        taskList.get(taskIndex).setTypeOfChange(TypeOfChange.Changed);
         synchronizeListsElements(taskIndex);
-        notifyObservers();
+        notifyObservers(taskList.get(taskIndex));
     }
 
     private void changeTaskStatus(int taskIndex, String newStatus) {
         taskList.get(taskIndex).changeStatus(newStatus);
+        taskList.get(taskIndex).setTypeOfChange(TypeOfChange.Changed);
         synchronizeListsElements(taskIndex);
-        notifyObservers();
+        notifyObservers(taskList.get(taskIndex));
     }
 
     private void cancelAllTasks() {
         for (int i = 0; i < taskList.size(); i++) {
             taskList.get(i).changeStatus(Constants.CanceledStatusString);
+            taskList.get(i).setTypeOfChange(TypeOfChange.Changed);
+            notifyObservers(taskList.get(i));
             synchronizeListsElements(i);
         }
-        notifyObservers();
     }
 
     private void synchronizeListsElements(int index) {
@@ -207,7 +210,7 @@ public class TaskManagerController implements ITaskSubject {
 
     private TaskViewModel getTaskFromForm() {
         return new TaskViewModel(
-                generateNewTaskId(),
+                TaskViewModel.NewTaskId,
                 taskNameTextField.getText(),
                 priorityChoiceBox.getValue(),
                 statusChoiceBox.getValue(),
@@ -298,20 +301,5 @@ public class TaskManagerController implements ITaskSubject {
 
     private int getFocusedTaskIndex() {
         return taskListView.getFocusModel().getFocusedIndex();
-    }
-
-    private int generateNewTaskId() {
-        int maxId = 0;
-        int newId = 0;
-
-        for (Integer id : idList) {
-            if (id > maxId) {
-                maxId = id;
-            }
-        }
-        newId = maxId + 1;
-
-        idList.add(newId);
-        return newId;
     }
 }
