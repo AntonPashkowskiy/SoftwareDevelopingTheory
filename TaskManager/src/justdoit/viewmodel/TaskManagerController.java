@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import justdoit.common.Constants;
 import justdoit.common.ITaskObserver;
 import justdoit.common.ITaskSubject;
 import justdoit.model.ITaskSource;
@@ -26,6 +27,7 @@ public class TaskManagerController implements ITaskSubject {
     @FXML Button cancelAllButton = new Button();
 
     private List<TaskViewModel> taskList = new ArrayList<TaskViewModel>();
+    private List<Integer> idList = new ArrayList<Integer>();
     private ObservableList<String> listViewItems = FXCollections.observableArrayList();
     private boolean isEditingMode = false;
     private int indexOfEditedTask = -1;
@@ -53,10 +55,17 @@ public class TaskManagerController implements ITaskSubject {
     public void setTaskSource(ITaskSource taskSource) {
         this.taskSource = taskSource;
         TaskViewModel[] currentTasks = taskSource.getTasksByDate(LocalDate.now());
+        TaskViewModel[] allTasks = taskSource.getAllTasks();
 
         if (currentTasks != null) {
             for (TaskViewModel task : currentTasks) {
                 addTask(task);
+            }
+        }
+
+        if (allTasks != null) {
+            for (TaskViewModel task : allTasks) {
+                idList.add(task.getId());
             }
         }
     }
@@ -120,7 +129,11 @@ public class TaskManagerController implements ITaskSubject {
         TaskViewModel task = getTaskFromForm();
 
         if (!task.getName().isEmpty()) {
-            taskList.set(taskIndex, task);
+            taskList.get(taskIndex).changeStatus(task.getStatus());
+            taskList.get(taskIndex).changePriority(task.getPriority());
+            taskList.get(taskIndex).changeDescription(task.getDescription());
+            taskList.get(taskIndex).changeTaskName(task.getName());
+
             synchronizeListsElements(taskIndex);
             clearForm();
             clearErrorMessage();
@@ -167,7 +180,7 @@ public class TaskManagerController implements ITaskSubject {
 
     private void cancelAllTasks() {
         for (int i = 0; i < taskList.size(); i++) {
-            taskList.get(i).changeStatus("Canceled");
+            taskList.get(i).changeStatus(Constants.CanceledStatusString);
             synchronizeListsElements(i);
         }
         notifyObservers();
@@ -194,7 +207,7 @@ public class TaskManagerController implements ITaskSubject {
 
     private TaskViewModel getTaskFromForm() {
         return new TaskViewModel(
-                TaskViewModel.newTaskId,
+                generateNewTaskId(),
                 taskNameTextField.getText(),
                 priorityChoiceBox.getValue(),
                 statusChoiceBox.getValue(),
@@ -208,8 +221,8 @@ public class TaskManagerController implements ITaskSubject {
 
     private void clearForm() {
         taskNameTextField.setText("");
-        priorityChoiceBox.setValue("Low");
-        statusChoiceBox.setValue("To Do");
+        priorityChoiceBox.setValue(Constants.LowPriorityString);
+        statusChoiceBox.setValue(Constants.ToDoStatusString);
         descriptionTextArea.setText("");
         addTaskButton.setText("Add");
         isEditingMode = false;
@@ -229,13 +242,13 @@ public class TaskManagerController implements ITaskSubject {
     private ContextMenu createContextMenu() {
         ContextMenu resultMenu = new ContextMenu();
         MenuItem deleteTaskMenuItem = new MenuItem("Delete task");
-        MenuItem toDoMenuItem = new MenuItem("To Do");
-        MenuItem inProgressMenuItem = new MenuItem("In Progress");
-        MenuItem doneMenuItem = new MenuItem("Done");
-        MenuItem canceledMenuItem = new MenuItem("Canceled");
-        MenuItem lowPriorityMenuItem = new MenuItem("Low");
-        MenuItem mediumPriorityMenuItem = new MenuItem("Medium");
-        MenuItem heightPriorityMenuItem = new MenuItem("Height");
+        MenuItem toDoMenuItem = new MenuItem(Constants.ToDoStatusString);
+        MenuItem inProgressMenuItem = new MenuItem(Constants.InProgressStatusString);
+        MenuItem doneMenuItem = new MenuItem(Constants.DoneStatusString);
+        MenuItem canceledMenuItem = new MenuItem(Constants.CanceledStatusString);
+        MenuItem lowPriorityMenuItem = new MenuItem(Constants.LowPriorityString);
+        MenuItem mediumPriorityMenuItem = new MenuItem(Constants.MediumPriorityString);
+        MenuItem heightPriorityMenuItem = new MenuItem(Constants.HeightPriorityString);
 
         deleteTaskMenuItem.setOnAction(event -> {
             deleteTask(getFocusedTaskIndex());
@@ -285,5 +298,20 @@ public class TaskManagerController implements ITaskSubject {
 
     private int getFocusedTaskIndex() {
         return taskListView.getFocusModel().getFocusedIndex();
+    }
+
+    private int generateNewTaskId() {
+        int maxId = 0;
+        int newId = 0;
+
+        for (Integer id : idList) {
+            if (id > maxId) {
+                maxId = id;
+            }
+        }
+        newId = maxId + 1;
+
+        idList.add(newId);
+        return newId;
     }
 }
